@@ -1,5 +1,7 @@
 package grid
 
+import "github.com/daviesjamie/mazes-in-go/util"
+
 type Cell struct {
 	Row, Column              int
 	North, South, East, West *Cell
@@ -35,19 +37,6 @@ func (c *Cell) IsLinked(cell *Cell) bool {
 }
 
 func (c *Cell) Neighbours() []*Cell {
-	cells := make([]*Cell, 0, 4)
-	if c.North != nil {
-		cells = append(cells, c.North)
-	}
-	if c.South != nil {
-		cells = append(cells, c.South)
-	}
-	if c.East != nil {
-		cells = append(cells, c.East)
-	}
-	if c.West != nil {
-		cells = append(cells, c.West)
-	}
-
-	return cells
+	cells := []*Cell{c.North, c.South, c.East, c.West}
+	return util.FilterSlice(cells, func(c *Cell) bool { return c != nil })
 }
