@@ -7,7 +7,7 @@ type Cell struct {
 }
 
 func NewCell(row, column int) *Cell {
-	return &Cell{Row: row, Column: column}
+	return &Cell{Row: row, Column: column, links: map[*Cell]bool{}}
 }
 
 func (c *Cell) Link(cell *Cell) {

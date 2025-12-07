@@ -5,7 +5,7 @@ import (
 	"github.com/daviesjamie/mazes-in-go/util"
 )
 
-func BinaryTree(g grid.Grid) {
+func BinaryTree(g *grid.Grid) {
 	for cell := range g.EachCell() {
 		neighbours := []*grid.Cell{cell.North, cell.East}
 		neighbours = util.FilterSlice(neighbours, func(cell *grid.Cell) bool { return cell != nil })
