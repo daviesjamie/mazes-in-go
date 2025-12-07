@@ -9,6 +9,6 @@ import (
 
 func main() {
 	g := grid.NewGrid(4, 4)
-	algorithm.BinaryTree(g)
+	algorithm.Sidewinder(g)
 	fmt.Println(g)
 }
