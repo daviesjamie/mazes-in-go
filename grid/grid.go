@@ -1,8 +1,9 @@
 package grid
 
 import (
-	"context"
+	"iter"
 	"math/rand"
+	"slices"
 )
 
 type Grid struct {
@@ -10,10 +11,10 @@ type Grid struct {
 	cells         [][]*Cell
 }
 
-func NewGrid(ctx context.Context, rows, columns int) *Grid {
+func NewGrid(rows, columns int) *Grid {
 	grid := &Grid{Rows: rows, Columns: columns}
 	grid.PrepareGrid()
-	grid.ConfigureCells(ctx)
+	grid.ConfigureCells()
 	return grid
 }
 
@@ -28,8 +29,8 @@ func (g *Grid) PrepareGrid() {
 	}
 }
 
-func (g *Grid) ConfigureCells(ctx context.Context) {
-	for cell := range g.EachCell(ctx) {
+func (g *Grid) ConfigureCells() {
+	for cell := range g.EachCell() {
 		row, col := cell.Row, cell.Column
 		cell.North = g.CellAt(row-1, col)
 		cell.South = g.CellAt(row+1, col)
@@ -38,38 +39,20 @@ func (g *Grid) ConfigureCells(ctx context.Context) {
 	}
 }
 
-func (g *Grid) EachRow(ctx context.Context) <-chan []*Cell {
-	rowStream := make(chan []*Cell)
-	go func() {
-		defer close(rowStream)
-
-		for _, row := range g.cells {
-			select {
-			case <-ctx.Done():
-				return
-			case rowStream <- row:
-			}
-		}
-	}()
-	return rowStream
+func (g *Grid) EachRow() iter.Seq[[]*Cell] {
+	return slices.Values(g.cells)
 }
 
-func (g *Grid) EachCell(ctx context.Context) <-chan *Cell {
-	cellStream := make(chan *Cell)
-	go func() {
-		defer close(cellStream)
-
-		for row := range g.EachRow(ctx) {
+func (g *Grid) EachCell() iter.Seq[*Cell] {
+	return func(yield func(*Cell) bool) {
+		for row := range g.EachRow() {
 			for _, cell := range row {
-				select {
-				case <-ctx.Done():
+				if !yield(cell) {
 					return
-				case cellStream <- cell:
 				}
 			}
 		}
-	}()
-	return cellStream
+	}
 }
 
 func (g *Grid) CellAt(row, column int) *Cell {
