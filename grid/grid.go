@@ -7,45 +7,40 @@ import (
 )
 
 type Grid struct {
-	Rows, Columns int
+	rows, columns int
 	cells         [][]*Cell
 }
 
 func NewGrid(rows, columns int) *Grid {
-	grid := &Grid{Rows: rows, Columns: columns}
-	grid.PrepareGrid()
-	grid.ConfigureCells()
-	return grid
-}
+	g := &Grid{rows: rows, columns: columns}
+	g.cells = make([][]*Cell, g.rows)
 
-func (g *Grid) PrepareGrid() {
-	g.cells = make([][]*Cell, g.Rows)
-
-	for row := range g.Rows {
-		g.cells[row] = make([]*Cell, g.Columns)
-		for column := range g.Columns {
+	// Create all the cells
+	for row := range g.rows {
+		g.cells[row] = make([]*Cell, g.columns)
+		for column := range g.columns {
 			g.cells[row][column] = NewCell(row, column)
 		}
 	}
-}
 
-func (g *Grid) ConfigureCells() {
-	for cell := range g.EachCell() {
+	// Tell each cell which cells are its neighbours
+	for cell := range g.Cells() {
 		row, col := cell.Row, cell.Column
 		cell.North = g.CellAt(row-1, col)
 		cell.South = g.CellAt(row+1, col)
 		cell.West = g.CellAt(row, col-1)
 		cell.East = g.CellAt(row, col+1)
 	}
+	return g
 }
 
-func (g *Grid) EachRow() iter.Seq[[]*Cell] {
+func (g *Grid) Rows() iter.Seq[[]*Cell] {
 	return slices.Values(g.cells)
 }
 
-func (g *Grid) EachCell() iter.Seq[*Cell] {
+func (g *Grid) Cells() iter.Seq[*Cell] {
 	return func(yield func(*Cell) bool) {
-		for row := range g.EachRow() {
+		for row := range g.Rows() {
 			for _, cell := range row {
 				if !yield(cell) {
 					return
@@ -68,7 +63,7 @@ func (g *Grid) CellAt(row, column int) *Cell {
 }
 
 func (g *Grid) RandomCell() *Cell {
-	row := rand.Intn(g.Rows)
-	col := rand.Intn(g.Columns)
+	row := rand.Intn(g.rows)
+	col := rand.Intn(g.columns)
 	return g.CellAt(row, col)
 }

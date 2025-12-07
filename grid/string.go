@@ -3,9 +3,9 @@ package grid
 import "strings"
 
 func (g *Grid) String() string {
-	output := "+" + strings.Repeat("---+", g.Columns) + "\n"
+	output := "+" + strings.Repeat("---+", g.columns) + "\n"
 
-	for row := range g.EachRow() {
+	for row := range g.Rows() {
 		middle := "|"
 		bottom := "+"
 

@@ -6,7 +6,7 @@ import (
 )
 
 func BinaryTree(g *grid.Grid) {
-	for cell := range g.EachCell() {
+	for cell := range g.Cells() {
 		neighbours := []*grid.Cell{cell.North, cell.East}
 		neighbours = util.FilterSlice(neighbours, func(cell *grid.Cell) bool { return cell != nil })
 

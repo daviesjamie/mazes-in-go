@@ -8,8 +8,8 @@ import (
 )
 
 func Sidewinder(g *grid.Grid) {
-	for row := range g.EachRow() {
-		run := []*grid.Cell{}
+	for row := range g.Rows() {
+		var run []*grid.Cell
 
 		for _, cell := range row {
 			run = append(run, cell)
