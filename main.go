@@ -5,11 +5,22 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/daviesjamie/mazes-in-go/algorithm"
 	"github.com/daviesjamie/mazes-in-go/grid"
 )
+
+type mapping struct {
+	algorithm func(*grid.Grid)
+	aliases   []string
+}
+
+var mappings []mapping = []mapping{
+	{algorithm: algorithm.BinaryTree, aliases: []string{"binary_tree", "binary-tree", "bt"}},
+	{algorithm: algorithm.Sidewinder, aliases: []string{"sidewinder", "sw"}},
+}
 
 func main() {
 	algorithmArg := flag.String("algorithm", "", "the algorithm to use to generate the maze")
@@ -20,7 +31,8 @@ func main() {
 
 	a, err := mapArgToAlgorithm(*algorithmArg)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Invalid algorithm: '%s'\n", *algorithmArg)
+		fmt.Fprintf(os.Stderr, "Invalid algorithm: '%s'\n\n", *algorithmArg)
+		printAlgorithmOptions()
 		os.Exit(1)
 	}
 
@@ -30,12 +42,20 @@ func main() {
 }
 
 func mapArgToAlgorithm(arg string) (func(*grid.Grid), error) {
-	switch strings.ToLower(arg) {
-	case "binary_tree", "binary-tree", "bt":
-		return algorithm.BinaryTree, nil
-	case "sidewinder", "sw":
-		return algorithm.Sidewinder, nil
-	default:
-		return nil, errors.New("unknown algorithm")
+	lcName := strings.ToLower(arg)
+
+	for _, m := range mappings {
+		if slices.Contains(m.aliases, lcName) {
+			return m.algorithm, nil
+		}
+	}
+
+	return nil, errors.New("unknown algorithm")
+}
+
+func printAlgorithmOptions() {
+	fmt.Fprintln(os.Stderr, "Possible algorithm options:")
+	for _, m := range mappings {
+		fmt.Fprintf(os.Stderr, " - %s\n", strings.Join(m.aliases, ", "))
 	}
 }
